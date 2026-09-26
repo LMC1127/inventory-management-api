@@ -1,7 +1,12 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 
 app = FastAPI()
+class ProductCreate(BaseModel):
+    name: str
+    price: int
+    stock: int
 
 
 products = [
@@ -30,3 +35,15 @@ def get_product(product_id: int):
             return product
 
     return {"message": "Product not found"}
+@app.post("/products")
+def create_product(product: ProductCreate):
+    new_product = {
+        "id": len(products) + 1,
+        "name": product.name,
+        "price": product.price,
+        "stock": product.stock
+    }
+
+    products.append(new_product)
+
+    return new_product
