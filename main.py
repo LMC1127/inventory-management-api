@@ -8,6 +8,15 @@ class ProductCreate(BaseModel):
     price: int
     stock: int
 
+class ProductUpdate(BaseModel):
+    name: str
+    price: int
+    stock: int
+
+class ProductPatch(BaseModel):
+    name: str | None = None
+    price: int | None = None
+    stock: int | None = None
 
 products = [
     {
@@ -47,3 +56,35 @@ def create_product(product: ProductCreate):
     products.append(new_product)
 
     return new_product
+@app.put("/products/{product_id}")
+def update_product(product_id: int, product: ProductUpdate):
+    for index, existing_product in enumerate(products):
+        if existing_product["id"] == product_id:
+            updated_product = {
+                "id": product_id,
+                "name": product.name,
+                "price": product.price,
+                "stock": product.stock
+            }
+
+            products[index] = updated_product
+
+            return updated_product
+
+    return {"message": "Product not found"}
+@app.patch("/products/{product_id}")
+def patch_product(product_id: int, product: ProductPatch):
+    for existing_product in products:
+        if existing_product["id"] == product_id:
+            if product.name is not None:
+                existing_product["name"] = product.name
+
+            if product.price is not None:
+                existing_product["price"] = product.price
+
+            if product.stock is not None:
+                existing_product["stock"] = product.stock
+
+            return existing_product
+
+    return {"message": "Product not found"}
