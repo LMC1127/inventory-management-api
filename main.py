@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 
@@ -43,7 +43,10 @@ def get_product(product_id: int):
         if product["id"] == product_id:
             return product
 
-    return {"message": "Product not found"}
+    raise HTTPException(
+        status_code=404,
+        detail="Product not found"
+    )
 @app.post("/products")
 def create_product(product: ProductCreate):
     new_product = {
@@ -71,7 +74,10 @@ def update_product(product_id: int, product: ProductUpdate):
 
             return updated_product
 
-    return {"message": "Product not found"}
+    raise HTTPException(
+    status_code=404,
+    detail="Product not found"
+    )
 @app.patch("/products/{product_id}")
 def patch_product(product_id: int, product: ProductPatch):
     for existing_product in products:
@@ -87,7 +93,10 @@ def patch_product(product_id: int, product: ProductPatch):
 
             return existing_product
 
-    return {"message": "Product not found"}
+    raise HTTPException(
+    status_code=404,
+    detail="Product not found"
+    )    
 @app.delete("/products/{product_id}")
 def delete_product(product_id: int):
     for index, existing_product in enumerate(products):
@@ -95,4 +104,7 @@ def delete_product(product_id: int):
             deleted_product = products.pop(index)
             return deleted_product
 
-    return {"message": "Product not found"}
+    raise HTTPException(
+    status_code=404,
+    detail="Product not found"
+    )
