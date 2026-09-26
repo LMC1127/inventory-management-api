@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from database import get_all_products, get_product_by_id
 
 
 app = FastAPI()
@@ -36,17 +37,22 @@ products = [
 
 @app.get("/products")
 def get_products():
-    return products
+    return get_all_products() 
+
+
 @app.get("/products/{product_id}")
 def get_product(product_id: int):
-    for product in products:
-        if product["id"] == product_id:
-            return product
+    product = get_product_by_id(product_id)
 
-    raise HTTPException(
-        status_code=404,
-        detail="Product not found"
-    )
+    if product is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found"
+        )
+
+    return product
+
+
 @app.post("/products")
 def create_product(product: ProductCreate):
     new_product = {
