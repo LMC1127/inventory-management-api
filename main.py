@@ -88,3 +88,11 @@ def patch_product(product_id: int, product: ProductPatch):
             return existing_product
 
     return {"message": "Product not found"}
+@app.delete("/products/{product_id}")
+def delete_product(product_id: int):
+    for index, existing_product in enumerate(products):
+        if existing_product["id"] == product_id:
+            deleted_product = products.pop(index)
+            return deleted_product
+
+    return {"message": "Product not found"}
