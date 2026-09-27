@@ -1,6 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from database import get_all_products, get_product_by_id
+from database import (
+    get_all_products,
+    get_product_by_id,
+    create_product as create_product_in_db
+)
 
 
 app = FastAPI()
@@ -55,16 +59,12 @@ def get_product(product_id: int):
 
 @app.post("/products")
 def create_product(product: ProductCreate):
-    new_product = {
-        "id": len(products) + 1,
-        "name": product.name,
-        "price": product.price,
-        "stock": product.stock
-    }
+    return create_product_in_db(
+        name=product.name,
+        price=product.price,
+        stock=product.stock
+    )
 
-    products.append(new_product)
-
-    return new_product
 @app.put("/products/{product_id}")
 def update_product(product_id: int, product: ProductUpdate):
     for index, existing_product in enumerate(products):

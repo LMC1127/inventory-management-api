@@ -60,6 +60,38 @@ def get_product_by_id(product_id: int):
             )
 
             return cursor.fetchone()
+def create_product(name: str, price: int, stock: int):
+    with psycopg.connect(DATABASE_URL, row_factory=dict_row) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO products (
+                    name,
+                    price,
+                    stock
+                )
+                VALUES (%s, %s, %s)
+                RETURNING
+                    id,
+                    name,
+                    description,
+                    price,
+                    stock,
+                    category,
+                    created_at,
+                    updated_at;
+                """,
+                (name, price, stock)
+            )
+
+            return cursor.fetchone()
+
 
 if __name__ == "__main__":
-    print(get_product_by_id(999))
+    print(
+        create_product(
+            name="Wireless Mouse",
+            price=1200,
+            stock=25
+        )
+    )
