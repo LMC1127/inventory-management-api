@@ -5,7 +5,8 @@ from database import (
     get_product_by_id,
     create_product as create_product_in_db,
     update_product as update_product_in_db,
-    patch_product as patch_product_in_db
+    patch_product as patch_product_in_db,
+    delete_product as delete_product_in_db
 )
 
 
@@ -103,12 +104,12 @@ def patch_product(product_id: int, product: ProductPatch):
 
 @app.delete("/products/{product_id}")
 def delete_product(product_id: int):
-    for index, existing_product in enumerate(products):
-        if existing_product["id"] == product_id:
-            deleted_product = products.pop(index)
-            return deleted_product
+    deleted_product = delete_product_in_db(product_id)
 
-    raise HTTPException(
-    status_code=404,
-    detail="Product not found"
-    )
+    if deleted_product is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found"
+        )
+
+    return deleted_product

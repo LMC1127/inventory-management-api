@@ -143,13 +143,27 @@ def patch_product(
             )
 
             return cursor.fetchone()
+def delete_product(product_id: int):
+    with psycopg.connect(DATABASE_URL, row_factory=dict_row) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                DELETE FROM products
+                WHERE id = %s
+                RETURNING
+                    id,
+                    name,
+                    description,
+                    price,
+                    stock,
+                    category,
+                    created_at,
+                    updated_at;
+                """,
+                (product_id,)
+            )
+
+            return cursor.fetchone()
 
 if __name__ == "__main__":
-    print(
-        patch_product(
-            product_id=2,
-            name=None,
-            price=None,
-            stock=50
-        )
-    )
+    print(delete_product(3))
