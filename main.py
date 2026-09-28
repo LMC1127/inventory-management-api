@@ -97,3 +97,7 @@ def delete_product(product_id: int):
         )
 
     return deleted_product
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
