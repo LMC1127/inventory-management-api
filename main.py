@@ -3,7 +3,9 @@ from pydantic import BaseModel
 from database import (
     get_all_products,
     get_product_by_id,
-    create_product as create_product_in_db
+    create_product as create_product_in_db,
+    update_product as update_product_in_db,
+    patch_product as patch_product_in_db
 )
 
 
@@ -67,42 +69,38 @@ def create_product(product: ProductCreate):
 
 @app.put("/products/{product_id}")
 def update_product(product_id: int, product: ProductUpdate):
-    for index, existing_product in enumerate(products):
-        if existing_product["id"] == product_id:
-            updated_product = {
-                "id": product_id,
-                "name": product.name,
-                "price": product.price,
-                "stock": product.stock
-            }
-
-            products[index] = updated_product
-
-            return updated_product
-
-    raise HTTPException(
-    status_code=404,
-    detail="Product not found"
+    updated_product = update_product_in_db(
+        product_id=product_id,
+        name=product.name,
+        price=product.price,
+        stock=product.stock
     )
+
+    if updated_product is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found"
+        )
+
+    return updated_product
+
 @app.patch("/products/{product_id}")
 def patch_product(product_id: int, product: ProductPatch):
-    for existing_product in products:
-        if existing_product["id"] == product_id:
-            if product.name is not None:
-                existing_product["name"] = product.name
+    updated_product = patch_product_in_db(
+        product_id=product_id,
+        name=product.name,
+        price=product.price,
+        stock=product.stock
+    )
 
-            if product.price is not None:
-                existing_product["price"] = product.price
+    if updated_product is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found"
+        )
 
-            if product.stock is not None:
-                existing_product["stock"] = product.stock
+    return updated_product
 
-            return existing_product
-
-    raise HTTPException(
-    status_code=404,
-    detail="Product not found"
-    )    
 @app.delete("/products/{product_id}")
 def delete_product(product_id: int):
     for index, existing_product in enumerate(products):

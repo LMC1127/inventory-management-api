@@ -85,13 +85,71 @@ def create_product(name: str, price: int, stock: int):
             )
 
             return cursor.fetchone()
+def update_product(product_id: int, name: str, price: int, stock: int):
+    with psycopg.connect(DATABASE_URL, row_factory=dict_row) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE products
+                SET
+                    name = %s,
+                    price = %s,
+                    stock = %s,
+                    updated_at = NOW()
+                WHERE id = %s
+                RETURNING
+                    id,
+                    name,
+                    description,
+                    price,
+                    stock,
+                    category,
+                    created_at,
+                    updated_at;
+                """,
+                (name, price, stock, product_id)
+            )
 
+            return cursor.fetchone()
+
+def patch_product(
+    product_id: int,
+    name: str | None,
+    price: int | None,
+    stock: int | None
+):
+    with psycopg.connect(DATABASE_URL, row_factory=dict_row) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE products
+                SET
+                    name = COALESCE(%s, name),
+                    price = COALESCE(%s, price),
+                    stock = COALESCE(%s, stock),
+                    updated_at = NOW()
+                WHERE id = %s
+                RETURNING
+                    id,
+                    name,
+                    description,
+                    price,
+                    stock,
+                    category,
+                    created_at,
+                    updated_at;
+                """,
+                (name, price, stock, product_id)
+            )
+
+            return cursor.fetchone()
 
 if __name__ == "__main__":
     print(
-        create_product(
-            name="Wireless Mouse",
-            price=1200,
-            stock=25
+        patch_product(
+            product_id=2,
+            name=None,
+            price=None,
+            stock=50
         )
     )
