@@ -26,22 +26,6 @@ class ProductPatch(BaseModel):
     price: int | None = None
     stock: int | None = None
 
-products = [
-    {
-        "id": 1,
-        "name": "Mechanical Keyboard",
-        "price": 2500,
-        "stock": 10
-    },
-    {
-        "id": 2,
-        "name": "Wireless Mouse",
-        "price": 1200,
-        "stock": 25
-    }
-]
-
-
 @app.get("/products")
 def get_products():
     return get_all_products() 
