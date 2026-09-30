@@ -257,3 +257,35 @@ def test_create_product_missing_price():
 
     assert get_response.status_code == 200
     assert get_response.json() == []
+
+def test_patch_product_rejects_null():
+    # Arrange
+    create_response = client.post(
+        "/products",
+        json={
+            "name": "Original Product",
+            "price": 1000,
+            "stock": 5
+        }
+    )
+
+    product_id = create_response.json()["id"]
+
+    # Act
+    response = client.patch(
+        f"/products/{product_id}",
+        json={
+            "stock": None
+        }
+    )
+
+    # Assert
+    assert response.status_code == 422
+    data = response.json()
+    assert data["detail"][0]["loc"] == ["body", "stock"]
+    assert "Field cannot be null" in data["detail"][0]["msg"]
+    get_response = client.get(f"/products/{product_id}")
+
+    data = get_response.json()
+
+    assert data["stock"] == 5

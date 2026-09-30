@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from database import (
     get_all_products,
     get_product_by_id,
@@ -25,6 +25,14 @@ class ProductPatch(BaseModel):
     name: str | None = None
     price: int | None = None
     stock: int | None = None
+
+    @field_validator("name", "price", "stock")
+    @classmethod
+    def reject_null(cls, value):
+        if value is None:
+            raise ValueError("Field cannot be null")
+
+        return value
 
 @app.get("/products")
 def get_products():
@@ -71,11 +79,11 @@ def update_product(product_id: int, product: ProductUpdate):
 
 @app.patch("/products/{product_id}")
 def patch_product(product_id: int, product: ProductPatch):
+    updates = product.model_dump(exclude_unset=True)
+
     updated_product = patch_product_in_db(
         product_id=product_id,
-        name=product.name,
-        price=product.price,
-        stock=product.stock
+        updates=updates
     )
 
     if updated_product is None:
