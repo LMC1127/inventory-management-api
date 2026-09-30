@@ -200,6 +200,60 @@ def test_delete_product():
 
     assert data["id"] == product_id
     assert data["name"] == "Delete Product"
-    
+
     get_response = client.get(f"/products/{product_id}")
     assert get_response.status_code == 404
+
+
+def test_get_product_not_found():
+    response = client.get("/products/999")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Product not found"}
+
+
+def test_update_product_not_found():
+    response = client.put(
+        "/products/999",
+        json={
+            "name": "Updated Product",
+            "price": 1500,
+            "stock": 10
+        }
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Product not found"}
+
+def test_patch_product_not_found():
+    response = client.patch(
+        "/products/999",
+        json={
+            "stock": 20
+        }
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Product not found"}
+
+def test_delete_product_not_found():
+    response = client.delete("/products/999")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Product not found"}
+
+def test_create_product_missing_price():
+    response = client.post(
+        "/products",
+        json={
+            "name": "Missing Price Product",
+            "stock": 5
+        }
+    )
+
+    assert response.status_code == 422
+
+    get_response = client.get("/products")
+
+    assert get_response.status_code == 200
+    assert get_response.json() == []
